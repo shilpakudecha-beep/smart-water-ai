@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="gu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087f8c">
+<meta name="description" content="ગણિત આધારિત સ્માર્ટ પાણી વ્યવસ્થાપન">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Smart Water AI</title>
+<style>
+:root{--teal:#087f8c;--blue:#e9f7fa;--ink:#17323a;--red:#b42318;--green:#137547}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,"Noto Sans Gujarati",sans-serif;background:#f2f8fa;color:var(--ink)}
+header{background:linear-gradient(135deg,#075e68,#0aa6a6);color:white;padding:22px 16px;text-align:center}
+header h1{margin:0 0 6px;font-size:1.65rem}header p{margin:0;font-size:.95rem}
+main{max-width:900px;margin:auto;padding:14px}
+.card{background:white;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 3px 14px #1231}
+h2{font-size:1.2rem;margin:0 0 12px;color:#075e68}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label{display:block;font-weight:650;margin:8px 0 5px}
+input,select,button{font:inherit;border-radius:10px;padding:11px;border:1px solid #b8d0d5;width:100%}
+button{background:var(--teal);color:white;border:0;font-weight:700;cursor:pointer;margin-top:10px}
+.secondary{background:#e5f4f6;color:#075e68;border:1px solid #b8dfe4}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px}
+.metric{background:var(--blue);padding:13px;border-radius:12px}.metric span{display:block;font-size:.85rem}.metric strong{font-size:1.4rem}
+.alert{padding:12px;border-radius:10px;background:#fff0ed;color:var(--red);font-weight:700;margin-top:10px}
+.good{background:#e8f7ee;color:var(--green)}
+.barrow{margin:10px 0}.barlabel{display:flex;justify-content:space-between;gap:10px}.bar{height:13px;background:#e2ecef;border-radius:99px;overflow:hidden}.fill{height:100%;background:#0b9aa6;width:0}
+.small{font-size:.88rem;color:#4e6870}.footer{text-align:center;font-size:.82rem;padding:18px;color:#557078}
+</style>
+</head>
+<body>
+<header>
+<h1>💧 Smart Water AI</h1>
+<p>ગણિત આધારિત સ્માર્ટ પાણી વ્યવસ્થાપન મોડલ</p>
+<p>પેટા વિષય 1(B) • Mathematical Modelling & Computational Thinking</p>
+</header>
+<main>
+<section class="card">
+<h2>📥 આજનો ડેટા દાખલ કરો</h2>
+<div class="grid">
+<div><label for="capacity">ટાંકીમાં ઉપલબ્ધ કુલ પાણી (લિટર)</label><input id="capacity" type="number" min="1" value="1000"></div>
+<div><label for="level">ટાંકીનું હાલનું લેવલ (%)</label><input id="level" type="number" min="0" max="100" value="70"></div>
+<div><label for="drink">પીવાનું + રસોઈ (લિટર)</label><input id="drink" type="number" min="0" value="20"></div>
+<div><label for="home">ઘરવપરાશ (લિટર)</label><input id="home" type="number" min="0" value="90"></div>
+<div><label for="garden">બાગાયત (લિટર)</label><input id="garden" type="number" min="0" value="30"></div>
+<div><label for="yesterday">ગઈકાલનો કુલ વપરાશ (લિટર)</label><input id="yesterday" type="number" min="0" value="172"></div>
+<div><label for="limit">ચેતવણીની મર્યાદા—કુલ વપરાશ (લિટર)</label><input id="limit" type="number" min="1" value="160"></div>
+</div>
+<button onclick="analyze()">વિશ્લેષણ કરો</button>
+<button class="secondary" onclick="voiceAlert()">🔊 સલાહ અવાજમાં સાંભળો</button>
+</section>
+<section class="card">
+<h2>📊 પરિણામ</h2>
+<div class="metrics">
+<div class="metric"><span>કુલ વપરાશ</span><strong id="total">140 L</strong></div>
+<div class="metric"><span>બાકી પાણી (અંદાજ)</span><strong id="remaining">860 L</strong></div>
+<div class="metric"><span>ગઈકાલથી બચત</span><strong id="saved">32 L</strong></div>
+<div class="metric"><span>બચત સ્કોર</span><strong id="score">70/100</strong></div>
+</div>
+<div id="alert" class="alert good">તમારો વપરાશ તપાસવા “વિશ્લેષણ કરો” દબાવો.</div>
+<div id="advice"></div>
+<div id="bars"></div>
+<p class="small">નોંધ: આંકડા તમે જાતે દાખલ કરો છો. બાકી પાણીની ગણતરી કુલ ઉપલબ્ધ પાણીમાંથી આજનો વપરાશ બાદ કરીને થાય છે.</p>
+</section>
+<section class="card">
+<h2>🧠 Computational Thinking</h2>
+<div class="grid">
+<div class="metric"><strong>1. Input</strong><span>પાણીનો ડેટા દાખલ કરો</span></div>
+<div class="metric"><strong>2. Process</strong><span>કુલ, બચત અને ટકાવારી ગણો</span></div>
+<div class="metric"><strong>3. Decision</strong><span>મર્યાદા સાથે સરખામણી કરો</span></div>
+<div class="metric"><strong>4. Output</strong><span>સલાહ અને ચેતવણી મેળવો</span></div>
+</div>
+</section>
+<section class="card">
+<h2>♻️ પાણી બચાવવાની યાદી</h2>
+<ul>
+<li>વાસણ ધોતાં નળ સતત ચાલુ ન રાખો.</li>
+<li>ટૂંકું સ્નાન કરો અને લીકેજ તપાસો.</li>
+<li>છોડને સવારે અથવા સાંજે જરૂર મુજબ પાણી આપો.</li>
+<li>યોગ્ય રીતે એકત્ર કરેલું ગ્રે-વોટર બાગાયત જેવા બિન-પીવાના ઉપયોગ માટે જ વાપરો.</li>
+<li>ગ્રે-વોટર પીવા કે રસોઈ માટે વાપરવું નહીં.</li>
+</ul>
+</section>
+<section class="card">
+<h2>📲 એપ તરીકે ઇન્સ્ટોલ કરો</h2>
+<p>આ PWA ફાઇલ છે. તેને ખરેખર હોમ સ્ક્રીન પર એપ તરીકે ઇન્સ્ટોલ કરવા માટે આ ફાઇલો HTTPS વેબસાઇટ પર હોવી જરૂરી છે. માત્ર ફોનમાં HTML ફાઇલ ખોલવાથી દરેક બ્રાઉઝરમાં Install વિકલ્પ નહીં દેખાય.</p>
+<p class="small">AI અંગે સ્પષ્ટતા: આ આવૃત્તિમાં નિયમ આધારિત સ્માર્ટ વિશ્લેષણ છે—ઑનલાઇન ChatGPT અથવા તાલીમ લીધેલું મશીન-લર્નિંગ મોડલ નથી. Arduino કે સેન્સરની જરૂર નથી.</p>
+</section>
+</main>
+<div class="footer">બાળ વૈજ્ઞાનિક પ્રદર્શન 2026–27 • Smart Water AI • Offline-ready demo</div>
+<script>
+function val(id){return Math.max(0,Number(document.getElementById(id).value)||0)}
+function analyze(){
+ const cap=val('capacity'), level=Math.min(100,val('level')), drink=val('drink'), home=val('home'), garden=val('garden'), yesterday=val('yesterday'), limit=val('limit');
+ const total=drink+home+garden, remaining=Math.max(0,cap-total), saved=yesterday-total;
+ const score=Math.max(0,Math.min(100,Math.round(70+(saved/Math.max(yesterday,1))*30)));
+ document.getElementById('total').textContent=total+' L';
+ document.getElementById('remaining').textContent=remaining+' L';
+ document.getElementById('saved').textContent=(saved>=0?'+':'')+saved+' L';
+ document.getElementById('score').textContent=score+'/100';
+ const arr=[['પીવાનું + રસોઈ',drink],['ઘરવપરાશ',home],['બાગાયત',garden]];
+ const max=Math.max(...arr.map(x=>x[1]));
+ const top=arr.find(x=>x[1]===max);
+ let tips={
+ 'પીવાનું + રસોઈ':'પીવાનું પાણી સુરક્ષિત રાખો અને વધારાનું સ્વચ્છ પાણી યોગ્ય કામમાં વાપરો.',
+ 'ઘરવપરાશ':'વાસણ ધોતાં નળ બંધ રાખો, ટૂંકું સ્નાન કરો અને લીકેજ તપાસો.',
+ 'બાગાયત':'છોડને સવારે/સાંજે પાણી આપો અને જરૂર મુજબ જ પાણી આપો.'
+ };
+ let msg, cls='alert';
+ if(total>limit){msg='🚨 ચેતવણી: કુલ વપરાશ નક્કી કરેલી મર્યાદાથી વધારે છે.'}
+ else if(level<30){msg='⚠️ ટાંકીનું લેવલ 30%થી ઓછું છે. જરૂરી ઉપયોગને પ્રાથમિકતા આપો.'}
+ else if(level<50){msg='⚠️ ટાંકીનું લેવલ 30–50% છે. પાણીનો સાવચેતીપૂર્વક ઉપયોગ કરો.'}
+ else {msg='✅ વપરાશ નક્કી કરેલી મર્યાદામાં છે. પાણીનો બગાડ ટાળો.';cls+=' good'}
+ const a=document.getElementById('alert');a.className=cls;a.textContent=msg;
+ document.getElementById('advice').innerHTML='<p><b>સ્માર્ટ સલાહ:</b> સૌથી વધુ વપરાશ: '+top[0]+'. '+tips[top[0]]+'</p><p><b>ગઈકાલ સાથે તુલના:</b> '+(saved>=0?'આજે '+saved+' લિટર ઓછું વપરાયું.':'આજે '+Math.abs(saved)+' લિટર વધુ વપરાયું.')+'</p>';
+ document.getElementById('bars').innerHTML=arr.map(x=>'<div class="barrow"><div class="barlabel"><span>'+x[0]+'</span><b>'+x[1]+' L</b></div><div class="bar"><div class="fill" style="width:'+(total?x[1]/Math.max(...arr.map(y=>y[1]),1)*100:0)+'%"></div></div></div>').join('');
+ window.currentVoice=msg+' સૌથી વધુ વપરાશ '+top[0]+' માં છે. '+tips[top[0]];
+}
+function voiceAlert(){
+ if(!('speechSynthesis' in window)){alert('આ બ્રાઉઝરમાં અવાજની સુવિધા ઉપલબ્ધ નથી.');return}
+ if(!window.currentVoice) analyze();
+ const u=new SpeechSynthesisUtterance(window.currentVoice||'પાણી બચાવો.');
+ u.lang='gu-IN';u.rate=.88; speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+analyze();
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
